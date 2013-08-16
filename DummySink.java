@@ -78,32 +78,34 @@ public class DummySink extends AbstractSink implements Configurable {
 
     @Override
     public Status process() throws EventDeliveryException {
+	Channel channel = getChannel();
         Status status = Status.READY;
-
-        Channel channel = getChannel();
+//        Channel channel = getChannel();
         Transaction transaction = channel.getTransaction();
         Event event = null;
-        long eventCounter = counterGroup.get("events.success");
+//      long eventCounter = counterGroup.get("events.success");
 
         try {
             transaction.begin();
-            int i = 0;
-            for (i = 0; i < batchSize; i++) {
-                event = channel.take();
-                if (++eventCounter % logEveryNEvents == 0) {
-                    logger.info("Null sink {} successful processed {} events.", getName(), eventCounter);
-                }
-                if(event == null) {
-                    status = Status.BACKOFF;
-                    break;
-                }
+            event = channel.take();
+	    int i = 0;
+	    logger.info("BATCHSIZE: " + batchSize);    
+	    if (event != null) {
+            	logger.info("Null sink {} successful processed event!!", getName());
+		logger.info(new String(event.getBody()));
+//                    status = Status.READY;
+            }
+            else if(event == null) {
+    		logger.info("Null Event to kerato mou");
+             	status = Status.BACKOFF;
+//	    	break;
             }
             transaction.commit();
-            counterGroup.addAndGet("events.success", (long) Math.min(batchSize, i));
-            counterGroup.incrementAndGet("transaction.success");
+   //         counterGroup.addAndGet("events.success", (long) Math.min(batchSize, i));
+   //         counterGroup.incrementAndGet("transaction.success");
         } catch (Exception ex) {
             transaction.rollback();
-            counterGroup.incrementAndGet("transaction.failed");
+   //         counterGroup.incrementAndGet("transaction.failed");
             logger.error("Failed to deliver event. Exception follows.", ex);
             throw new EventDeliveryException("Failed to deliver event: " + event, ex);
         } finally {
