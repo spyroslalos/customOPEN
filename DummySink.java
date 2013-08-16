@@ -56,8 +56,9 @@ public class DummySink extends AbstractSink implements Configurable {
     private static final int DFLT_LOG_EVERY_N_EVENTS = 10000;
 
     private CounterGroup counterGroup;
-    private int batchSize = DFLT_BATCH_SIZE;
-    private int logEveryNEvents = DFLT_LOG_EVERY_N_EVENTS;
+    private int batchSize;
+    private int logEveryNEvents;
+    private String zkquorum;
 
     public DummySink() {
         counterGroup = new CounterGroup();
@@ -66,6 +67,8 @@ public class DummySink extends AbstractSink implements Configurable {
     @Override
     public void configure(Context context) {
         batchSize = context.getInteger("batchSize", DFLT_BATCH_SIZE);
+        zkquorum = context.getString("zkquorum");
+     
         logger.debug(this.getName() + " " +
                 "batch size set to " + String.valueOf(batchSize));
         Preconditions.checkArgument(batchSize > 0, "Batch size must be > 0");
@@ -89,7 +92,7 @@ public class DummySink extends AbstractSink implements Configurable {
             transaction.begin();
             event = channel.take();
 	    int i = 0;
-	    logger.info("BATCHSIZE: " + batchSize);    
+	    logger.info("BATCHSIZE: " + batchSize + " ZKQUORUM: " + zkquorum);    
 	    if (event != null) {
             	logger.info("Null sink {} successful processed event!!", getName());
 		logger.info(new String(event.getBody()));
