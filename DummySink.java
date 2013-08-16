@@ -60,6 +60,9 @@ public class DummySink extends AbstractSink implements Configurable {
     private int logEveryNEvents;
     private String zkquorum;
 
+    private String seriesTable;
+    private String uidsTable;
+
     public DummySink() {
         counterGroup = new CounterGroup();
     }
@@ -77,6 +80,12 @@ public class DummySink extends AbstractSink implements Configurable {
         logger.debug(this.getName() + " " +
                 "log event N events set to " + logEveryNEvents);
         Preconditions.checkArgument(logEveryNEvents > 0, "logEveryNEvents must be > 0");
+
+   	seriesTable = context.getString("table.main", "tsdb");
+        uidsTable = context.getString("table.uids", "tsdb-uid");
+
+
+
     }
 
     @Override
@@ -93,6 +102,7 @@ public class DummySink extends AbstractSink implements Configurable {
             event = channel.take();
 	    int i = 0;
 	    logger.info("BATCHSIZE: " + batchSize + " ZKQUORUM: " + zkquorum);    
+ 	    logger.info("SERIESTABLE: " + seriesTable + " UIDSTABLE: " + uidsTable);
 	    if (event != null) {
             	logger.info("Null sink {} successful processed event!!", getName());
 		logger.info(new String(event.getBody()));
